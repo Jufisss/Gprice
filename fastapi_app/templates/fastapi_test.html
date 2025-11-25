@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FastAPI Test</title>
+</head>
+<body>
+    <h1>FastAPI Тестовая страница</h1>
+    
+    <div>
+        <h3>Поиск игр:</h3>
+        <input type="text" id="gameSearch" placeholder="Название игры">
+        <button onclick="searchGames()">Найти</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+    async function searchGames() {
+        const query = document.getElementById('gameSearch').value;
+        if (!query) return;
+
+        try {
+            const response = await fetch(`http://localhost:8001/api/public/search/steam?q=${query}`);
+            const data = await response.json();
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h4>Результаты:</h4>';
+            
+            data.results.forEach(game => {
+                resultsDiv.innerHTML += `
+                    <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                        <h5>${game.name}</h5>
+                        <p>Цена: ${game.current_price}€ (Скидка: ${game.discount_percent}%)</p>
+                        <img src="${game.image_url}" width="200">
+                    </div>
+                `;
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+    </script>
+</body>
+</html>
