@@ -673,7 +673,7 @@
 
     <script>
     // Функция вызывается после успешной авторизации Telegram
-    function onTelegramAuth(user) {
+        function onTelegramAuth(user) {
         console.log('Telegram auth successful:', user);
     
         // Отправляем данные на сервер
@@ -712,30 +712,30 @@
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
 
-    // Проверка статуса привязки
-    async function checkTelegramStatus() {
-        try {
-            const response = await fetch('/api/telegram/status/');
-            const data = await response.json();
+        // Проверка статуса привязки
+        async function checkTelegramStatus() {
+            try {
+                const response = await fetch('/api/telegram/status/');
+                const data = await response.json();
         
-            if (data.connected) {
-                document.getElementById('telegramConnect').style.display = 'none';
-                document.getElementById('telegramConnected').style.display = 'block';
+                if (data.connected) {
+                    document.getElementById('telegramConnect').style.display = 'none';
+                    document.getElementById('telegramConnected').style.display = 'block';
             
-                let userInfo = `@${data.telegram_username}`;
-                if (data.telegram_first_name) {
-                    userInfo = `${data.telegram_first_name} (${userInfo})`;
+                    let userInfo = `@${data.telegram_username}`;
+                    if (data.telegram_first_name) {
+                        userInfo = `${data.telegram_first_name} (${userInfo})`;
+                    }
+                    document.getElementById('telegramUserInfo').textContent = userInfo;
+                } else {
+                    document.getElementById('telegramConnect').style.display = 'block';
+                    document.getElementById('telegramConnected').style.display = 'none';
                 }
-                document.getElementById('telegramUserInfo').textContent = userInfo;
-            } else {
-                document.getElementById('telegramConnect').style.display = 'block';
-                document.getElementById('telegramConnected').style.display = 'none';
+            } catch (error) {
+                console.error('Error checking Telegram status:', error);
             }
-        } catch (error) {
-            console.error('Error checking Telegram status:', error);
         }
-    }
-    </script>
+    
 
         // Функция форматирования цены
         function formatPrice(price) {
