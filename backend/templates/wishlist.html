@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Мой вишлист - Gprice tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #161616;
+            --bg-secondary: #0f0f0f;
+            --bg-header: #000000;
+            --bg-buttons: #161616;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --accent-primary: #3b82f6;
+            --accent-hover: #60a5fa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Хэдер */
+        .header {
+            background: var(--bg-header);
+            height: 152px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            width: 250px;
+            height: 72px;
+            margin-left: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            max-height: 50px;
+            max-width: 200px;
+            height: auto;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-buttons {
+            position: absolute;
+            right: 60px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: var(--bg-buttons);
+            border: none;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .header-btn:hover {
+            background: #2a2a2a;
+        }
+
+        .header-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-primary);
+        }
+
+        .user-greeting {
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-right: 15px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            transition: color 0.3s ease;
+            border-radius: 6px;
+            margin: 0 0.25rem;
+            padding: 0.5rem 1rem !important;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-primary) !important;
+            background-color: var(--bg-buttons);
+        }
+
+        /* Основной контент */
+        .content-section {
+            background: var(--bg-primary);
+            padding: 40px 160px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Сетка игр */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 100%;
+        }
+
+        .game-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            min-height: 420px; /* Минимальная высота для авто-лейаута */
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-primary);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .game-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Занимает все доступное пространство */
+        }
+
+        .game-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            height: 2.6em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .price-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            min-height: 40px;
+            flex-wrap: wrap; /* Позволяет элементам переноситься */
+        }
+
+        .current-price {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .discount-badge {
+            background: var(--success);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .target-info {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .target-badge {
+            font-size: 11px;
+            padding: 4px 8px;
+            margin-right: 5px;
+            margin-bottom: 3px;
+            display: inline-block;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            margin-top: auto; /* Прижимает кнопки к низу */
+            padding-top: 10px;
+        }
+
+        .btn-steam {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-steam:hover {
+            background: var(--accent-hover);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .btn-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .added-date {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #333;
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Утилиты */
+        .hidden {
+            display: none !important;
+        }
+
+        .user-menu {
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state h4 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+            color: white;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .content-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            
+            .header-buttons {
+                right: 20px;
+            }
+            
+            .logo {
+                margin-left: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                height: 120px;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .logo {
+                margin-left: 0;
+                margin-bottom: 10px;
+            }
+            
+            .header-buttons {
+                position: static;
+                margin-top: 10px;
+            }
+            
+            .game-card {
+                min-height: 400px;
+            }
+        }
+
+        /* Статус бар */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .games-count {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .refresh-btn {
+            background: var(--bg-buttons);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .refresh-btn:hover {
+            background: #2a2a2a;
+            transform: scale(1.05);
+        }
+
+        /* Иконки */
+        .icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    
+    <!-- Хэдер -->
+    <header class="header">
+        <div class="logo">
+            <img src="https://i.postimg.cc/nLwzR4x9/logo.png" alt="Gprice Tracker" class="logo-img">
+        </div>
+        
+        <div class="header-buttons">
+            <nav class="navbar-nav ms-auto d-flex flex-row">
+                <a class="nav-link" href="/">Поиск</a>
+                <a class="nav-link active" href="/wishlist/">Мой список</a>
+                <a class="nav-link" href="/admin/" target="_blank">Админка</a>
+            </nav>
+            
+            <span class="user-greeting" id="userGreeting"></span>
+            
+            <div id="userMenu" class="user-menu">
+                <button class="header-btn" title="Профиль">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </button>
+                <button class="header-btn" title="Выход" onclick="userLogout()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <section class="content-section">
+        <div class="page-header">
+            <h1 class="page-title">💖 Мой список желаний</h1>
+            <p class="page-subtitle">Здесь отображаются все игры, которые вы добавили для отслеживания цен</p>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="loading-spinner"></div>
+            <p>Загружаем ваш вишлист...</p>
+        </div>
+
+        <div id="errorAlert" class="alert alert-danger hidden"></div>
+
+        <div id="wishlistContent">
+            <!-- Здесь будет содержимое вишлиста -->
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    let currentUser = null;
+
+    // Проверяем авторизацию при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        checkAuthStatus();
+    });
+
+    async function checkAuthStatus() {
+        try {
+            const response = await fetch('/api/auth/current-user/');
+            if (response.ok) {
+                const userData = await response.json();
+                currentUser = userData;
+                setUserAuthenticated(userData);
+                loadWishlist();
+            } else {
+                // Если не авторизован, перенаправляем на главную
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error('Auth check error:', error);
+            window.location.href = '/';
+        }
+    }
+
+    function setUserAuthenticated(userData) {
+        document.getElementById('userMenu').style.display = 'flex';
+        document.getElementById('userGreeting').textContent = `Привет, ${userData.username}!`;
+        document.getElementById('userMenu').classList.remove('hidden');
+    }
+
+    async function loadWishlist() {
+        showLoading();
+        hideError();
+
+        try {
+            const response = await fetch('/api/my-wishlist/');
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки вишлиста');
+            }
+            
+            const data = await response.json();
+            hideLoading();
+            displayWishlist(data);
+
+        } catch (error) {
+            hideLoading();
+            showError('Ошибка при загрузке вишлиста: ' + error.message);
+        }
+    }
+
+    function displayWishlist(data) {
+        const content = document.getElementById('wishlistContent');
+        
+        if (!data.results || data.results.length === 0) {
+            content.innerHTML = `
+                <div class="empty-state">
+                    <h4>🎮 Ваш вишлист пуст</h4>
+                    <p>Начните добавлять игры из поиска чтобы отслеживать их цены!</p>
+                    <a href="/" class="btn-primary">Перейти к поиску игр</a>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="status-bar">
+                <div class="games-count">🎯 Всего игр: ${data.count}</div>
+                <button class="refresh-btn" onclick="loadWishlist()">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    </svg>
+                    Обновить
+                </button>
+            </div>
+            <div class="games-grid">
+        `;
+
+        data.results.forEach(item => {
+            const game = item.game;
+            const hasDiscount = game.discount_percent > 0;
+            const hasTarget = item.target_price || item.target_discount;
+            
+            // Форматируем цены в рубли
+            const formatPrice = (price) => {
+                if (price === 0 || price === null) return 'Бесплатно';
+                return `${price}₽`;
+            };
+
+            const currentPriceFormatted = formatPrice(game.current_price);
+            const originalPriceFormatted = formatPrice(game.original_price);
+            
+            const priceDisplay = hasDiscount ? 
+                `<div class="price-section">
+                    <span class="original-price">${originalPriceFormatted}</span>
+                    <span class="current-price">${currentPriceFormatted}</span>
+                    <span class="discount-badge">-${game.discount_percent}%</span>
+                </div>` :
+                `<div class="price-section">
+                    <span class="current-price">${currentPriceFormatted}</span>
+                </div>`;
+
+            let targetInfo = '';
+            if (hasTarget) {
+                targetInfo = `<div class="target-info">
+                    <small style="color: var(--text-secondary);">Уведомление при:</small><br>`;
+                
+                if (item.target_price) {
+                    targetInfo += `<span class="target-badge" style="background: var(--accent-primary); color: white;">Цена ≤ ${formatPrice(item.target_price)}</span>`;
+                }
+                if (item.target_discount) {
+                    targetInfo += `<span class="target-badge" style="background: var(--warning); color: #000;">Скидка ≥ ${item.target_discount}%</span>`;
+                }
+                targetInfo += `</div>`;
+            }
+
+            html += `
+                <div class="game-card">
+                    <img src="${game.image_url}" class="game-image" alt="${game.name}" 
+                         onerror="this.src='https://via.placeholder.com/400x200/0f0f0f/8e8e93?text=No+Image'">
+                    <div class="game-content">
+                        <h5 class="game-title">${game.name}</h5>
+                        ${priceDisplay}
+                        ${targetInfo}
+                        <div class="added-date">
+                            📅 Добавлено: ${new Date(item.created_at).toLocaleDateString('ru-RU')}
+                        </div>
+                        <div class="actions-row">
+                            <a href="${game.store_url}" target="_blank" class="btn-steam">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.187.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.029 4.524 4.524s-2.03 4.524-4.524 4.524h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.876 0-3.396-1.521-3.396-3.396 0-1.876 1.52-3.396 3.396-3.396.423 0 .83.079 1.205.222l1.81-.768-1.6-.665C3.305 8.259 6.998 4.36 11.979 4.36c4.99 0 9.038 4.047 9.038 9.037S16.969 22.434 11.98 22.434c-4.99 0-9.038-4.047-9.038-9.037 0-.29.015-.576.042-.858l2.512 1.04c-.011.238-.019.477-.019.718 0 3.034 2.465 5.5 5.5 5.5 3.034 0 5.5-2.466 5.5-5.5s-2.466-5.5-5.5-5.5c-.572 0-1.117.108-1.624.3l-2.046-.85C6.293 6.719 8.984 5.135 12 5.135c3.313 0 6 2.686 6 6s-2.687 6-6 6c-3.314 0-6-2.686-6-6 0-.642.126-1.255.354-1.816l-2.118-.877C3.573 9.427 3 10.75 3 12.198c0 4.142 3.357 7.5 7.5 7.5s7.5-3.358 7.5-7.5S16.142 4.698 12 4.698z"/>
+                                </svg>
+                                Steam
+                            </a>
+                            <button class="btn-remove" onclick="removeFromWishlist(${item.id})">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </svg>
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        content.innerHTML = html;
+    }
+
+    async function removeFromWishlist(wishlistId) {
+        if (!confirm('Удалить игру из вишлиста?')) {
+            return;
+        }
+
+        try {
+            const csrfToken = getCsrfToken();
+            const response = await fetch(`/api/wishlist/${wishlistId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                alert('✅ Игра удалена из вишлиста!');
+                loadWishlist(); // Перезагружаем список
+            } else {
+                throw new Error('Ошибка удаления');
+            }
+
+        } catch (error) {
+            alert('❌ Ошибка при удалении: ' + error.message);
+        }
+    }
+
+    async function userLogout() {
+        try {
+            await fetch('/api/auth/logout/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                credentials: 'same-origin'
+            });
+            
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    }
+
+    function getCsrfToken() {
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfInput ? csrfInput.value : '';
+    }
+
+    function showLoading() {
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('wishlistContent').innerHTML = '';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').classList.add('hidden');
+    }
+
+    function showError(message) {
+        const errorAlert = document.getElementById('errorAlert');
+        errorAlert.textContent = message;
+        errorAlert.classList.remove('hidden');
+    }
+
+    function hideError() {
+        document.getElementById('errorAlert').classList.add('hidden');
+    }
+    </script>
+</body>
+</html>

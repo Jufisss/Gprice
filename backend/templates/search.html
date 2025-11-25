@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Gprice tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #161616;
+            --bg-secondary: #0f0f0f;
+            --bg-header: #000000;
+            --bg-buttons: #161616;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --accent-primary: #3b82f6;
+            --accent-hover: #60a5fa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Хэдер */
+        .header {
+            background: var(--bg-header);
+            height: 152px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            width: 250px;
+            height: 72px;
+            margin-left: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            max-height: 50px;
+            max-width: 200px;
+            object-fit: contain;
+        }
+
+        .header-buttons {
+            position: absolute;
+            right: 60px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: var(--bg-buttons);
+            border: none;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .header-btn:hover {
+            background: #2a2a2a;
+        }
+
+        .header-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-primary);
+        }
+
+        .user-greeting {
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-right: 15px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            transition: color 0.3s ease;
+            border-radius: 6px;
+            margin: 0 0.25rem;
+            padding: 0.5rem 1rem !important;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-primary) !important;
+            background-color: var(--bg-buttons);
+        }
+
+        /* Блок поиска */
+        .search-section {
+            background: var(--bg-header);
+            height: 140px;
+            display: flex;
+            align-items: center;
+            padding: 0 160px;
+        }
+
+        .search-form {
+            width: 100%;
+            height: 70px;
+            background: var(--bg-primary);
+            border: 2px solid #333;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            transition: all 0.3s ease;
+        }
+
+        .search-form:focus-within {
+            border-color: var(--accent-primary);
+        }
+
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 16px;
+            padding: 0 15px;
+            height: 100%;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .search-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-primary);
+        }
+
+        /* Блок с играми */
+        .games-section {
+            background: var(--bg-primary);
+            padding: 40px 160px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 100%;
+        }
+
+        .game-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            min-height: 380px; /* Минимальная высота для карточки */
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-primary);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .game-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Занимает все доступное пространство */
+        }
+
+        .game-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            height: 2.6em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .price-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            min-height: 40px;
+            flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку */
+        }
+
+        .current-price {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .discount-badge {
+            background: var(--success);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            margin-top: auto; /* Прижимает кнопки к низу карточки */
+            padding-top: 10px;
+        }
+
+        /* ОБНОВЛЕННЫЕ СТИЛИ КНОПОК - как в вишлисте */
+        .btn-steam {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-steam:hover {
+            background: var(--accent-hover);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .btn-wishlist {
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-wishlist:hover {
+            background: #34d399;
+            transform: scale(1.05);
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #333;
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Утилиты */
+        .hidden {
+            display: none !important;
+        }
+
+        .user-menu {
+            display: none;
+        }
+
+        .auth-info {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin: 20px 160px;
+        }
+
+        /* Модальные окна */
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border);
+            background: var(--bg-primary);
+        }
+
+        .form-control {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+        }
+
+        .form-control:focus {
+            background: var(--bg-primary);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        .form-label {
+            color: var(--text-primary);
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .search-section,
+            .games-section,
+            .auth-info {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            
+            .header-buttons {
+                right: 20px;
+            }
+            
+            .logo {
+                margin-left: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                height: 120px;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .logo {
+                margin-left: 0;
+                margin-bottom: 10px;
+            }
+            
+            .header-buttons {
+                position: static;
+                margin-top: 10px;
+            }
+            
+            .search-section {
+                height: 100px;
+                padding: 0 20px;
+            }
+            
+            .search-form {
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    
+    <!-- Хэдер -->
+    <header class="header">
+        <div class="logo">
+            <img src="https://i.postimg.cc/nLwzR4x9/logo.png" alt="Gprice Tracker" class="logo-img">
+        </div>
+        
+        <div class="header-buttons">
+            <nav class="navbar-nav ms-auto d-flex flex-row">
+                <a class="nav-link active" href="/">Поиск</a>
+                <a class="nav-link" href="/wishlist/">Мой список</a>
+                <a class="nav-link" href="/admin/" target="_blank">Админка</a>
+            </nav>
+            
+            <span class="user-greeting" id="userGreeting"></span>
+            
+            <div id="guestMenu">
+                <button class="header-btn" title="Вход" onclick="showLoginModal()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                </button>
+
+                <button class="header-btn" title="Регистрация" onclick="showRegisterModal()" style="margin-right: 10px;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="userMenu" class="user-menu">
+                <button class="header-btn" title="Профиль">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </button>
+                <button class="header-btn" title="Выход" onclick="userLogout()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                </button>
+
+                <button class="header-btn" title="Привязать Telegram" onclick="showTelegramModal()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.78 5.42-.9 6.8-.06.67-.36.89-.89.56-2.45-1.83-3.78-2.98-6.12-4.78-.54-.4-.54-.39.19-.6.93-.27 1.74-.45 1.79-.45.39-.09.56-.28.56-.28s.84-1.1 1.44-1.59c.45-.34.81-.38 1.02-.34.22.04.71.29.71.29l2.17 1.42c.33.18.57.27.62.45.06.17.06.39-.08.61z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Блок поиска -->
+    <section class="search-section">
+        <div class="search-form">
+            <input type="text" id="searchInput" class="search-input" placeholder="Поиск желаемой игры">
+            <button class="search-btn" onclick="searchGames()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+            </button>
+        </div>
+    </section>
+
+    <!-- Информация об авторизации -->
+    <div id="authInfo" class="auth-info">
+        <div id="guestInfo">
+            <h5 class="fw-bold">Войдите в систему</h5>
+            <p class="text-muted mb-0">Авторизуйтесь, чтобы добавлять игры в список желаний и получать уведомления</p>
+        </div>
+        <div id="userInfo" class="hidden">
+            <h5 class="fw-bold">Готово к использованию</h5>
+            <p class="text-muted mb-0">Теперь вы можете добавлять игры в список желаний и настраивать уведомления</p>
+        </div>
+    </div>
+
+    <!-- Блок с играми -->
+    <section class="games-section">
+        <div id="loading" class="loading hidden">
+            <div class="loading-spinner"></div>
+            <p>Ищем игры в каталоге Steam...</p>
+        </div>
+
+        <div id="errorAlert" class="alert alert-danger hidden"></div>
+
+        <div id="results" class="games-grid">
+            <!-- Здесь будут появляться карточки игр -->
+        </div>
+    </section>
+
+    <!-- Модальные окна -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Регистрация</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label class="form-label">Имя пользователя *</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль *</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Подтверждение пароля *</label>
+                            <input type="password" name="password2" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="userRegister()">Зарегистрироваться</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Вход</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label">Имя пользователя</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" onclick="userLogin()">Войти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="wishlistModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить в список желаний</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fw-bold mb-2" id="modalGameName"></p>
+                    <p class="text-muted small mb-3" id="modalGamePrice"></p>
+                    <div class="mb-3">
+                        <label class="form-label">Целевая цена (₽)</label>
+                        <input type="number" id="targetPrice" class="form-control" placeholder="Например: 1500">
+                        <div class="form-text">Оставьте пустым, если не хотите отслеживать цену</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Целевая скидка (%)</label>
+                        <input type="number" id="targetDiscount" class="form-control" placeholder="Например: 50" min="0" max="100">
+                        <div class="form-text">Оставьте пустым, если не хотите отслеживать скидку</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success" onclick="addToWishlist()">
+                        Добавить в список
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для привязки Telegram -->
+    <div class="modal fade" id="telegramModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Привязать Telegram</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="telegramConnect" style="display: none;">
+                        <p><strong>Привяжите Telegram для уведомлений о скидках</strong></p>
+                    
+                        <!-- Telegram Login Widget -->
+                        <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                                data-telegram-login="Gprice_Tracker_bot" 
+                                data-size="large" 
+                                data-auth-url="/api/telegram/connect/" 
+                                data-request-access="write"></script>
+                    
+                        <p class="mt-3 text-muted small">
+                            После авторизации бот отправит вам подтверждение в Telegram
+                        </p>
+                    </div>
+                
+                    <div id="telegramConnected" style="display: none;">
+                        <div class="alert alert-success">
+                            <strong>✅ Telegram привязан!</strong>
+                            <p class="mb-2" id="telegramUserInfo"></p>
+                            <small>Вы будете получать уведомления о скидках</small>
+                        </div>
+                        <button class="btn btn-danger w-100" onclick="disconnectTelegram()">
+                            Отвязать Telegram
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentGame = null;
+        let currentUser = null;
+
+        // Функция форматирования цены
+        function formatPrice(price) {
+            if (price === 0 || price === null) return 'Бесплатно';
+            return `${price}₽`;
+        }
+
+        // Проверяем авторизацию при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            document.getElementById('searchInput').focus();
+        });
+
+        // Функции аутентификации
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/current-user/');
+                if (response.ok) {
+                    const userData = await response.json();
+                    setUserAuthenticated(userData);
+                } else {
+                    setUserUnauthenticated();
+                }
+            } catch (error) {
+                setUserUnauthenticated();
+            }
+        }
+
+        function setUserAuthenticated(userData) {
+            currentUser = userData;
+            document.getElementById('guestMenu').style.display = 'none';
+            document.getElementById('userMenu').style.display = 'flex';
+            document.getElementById('guestInfo').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('userGreeting').textContent = `Привет, ${userData.username}!`;
+            
+            // Обновляем классы для отображения
+            document.getElementById('guestInfo').classList.add('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('guestMenu').classList.add('hidden');
+            document.getElementById('userMenu').classList.remove('hidden');
+        }
+
+        function setUserUnauthenticated() {
+            currentUser = null;
+            document.getElementById('guestMenu').style.display = 'block';
+            document.getElementById('userMenu').style.display = 'none';
+            document.getElementById('guestInfo').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'none';
+            
+            // Обновляем классы для отображения
+            document.getElementById('guestInfo').classList.remove('hidden');
+            document.getElementById('userInfo').classList.add('hidden');
+            document.getElementById('guestMenu').classList.remove('hidden');
+            document.getElementById('userMenu').classList.add('hidden');
+            document.getElementById('userGreeting').textContent = '';
+        }
+
+        function showRegisterModal() {
+            const modal = new bootstrap.Modal(document.getElementById('registerModal'));
+            modal.show();
+        }
+
+        function showLoginModal() {
+            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+            modal.show();
+        }
+
+        async function userRegister() {
+            const form = document.getElementById('registerForm');
+            const formData = new FormData(form);
+            
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                password2: formData.get('password2')
+            };
+
+            try {
+                const response = await fetch('/api/auth/register/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    setUserAuthenticated(result.user);
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+                    modal.hide();
+                    
+                    alert('Регистрация успешна!');
+                } else {
+                    alert('Ошибка регистрации: ' + (result.detail || JSON.stringify(result)));
+                }
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        }
+
+        async function userLogin() {
+            const form = document.getElementById('loginForm');
+            const formData = new FormData(form);
+            
+            const data = {
+                username: formData.get('username'),
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('/api/auth/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    setUserAuthenticated(result.user);
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                    modal.hide();
+                    
+                    alert('Вход успешен!');
+                } else {
+                    alert('Ошибка входа: ' + (result.error || JSON.stringify(result)));
+                }
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        }
+
+        async function userLogout() {
+            try {
+                await fetch('/api/auth/logout/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                setUserUnauthenticated();
+                alert('Выход успешен!');
+            } catch (error) {
+                alert('Ошибка выхода: ' + error.message);
+            }
+        }
+
+        // Функции поиска и отображения игр
+        async function searchGames() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (query.length < 2) {
+                showError('Введите минимум 2 символа для поиска');
+                return;
+            }
+
+            showLoading();
+            hideError();
+
+            try {
+                const response = await fetch(`http://localhost:8001/search/steam?q=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                hideLoading();
+                displayGames(data);
+
+            } catch (error) {
+                hideLoading();
+                showError('Ошибка при поиске: ' + error.message);
+                console.error('Search error:', error);
+            }
+        }
+
+        function displayGames(games) {
+            const results = document.getElementById('results');
+            
+            if (!Array.isArray(games) || games.length === 0) {
+                results.innerHTML = `
+                    <div class="col-12">
+                        <div class="game-card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                            <h5 class="fw-bold">Игры не найдены</h5>
+                            <p class="mb-0 text-muted">Попробуйте изменить поисковый запрос</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let gamesHtml = '';
+            games.forEach(game => {
+                const hasDiscount = game.discount_percent > 0;
+                const currentPriceFormatted = formatPrice(game.current_price);
+                const originalPriceFormatted = formatPrice(game.original_price);
+                
+                const priceDisplay = hasDiscount ? 
+                    `<div class="price-section">
+                        <span class="original-price">${originalPriceFormatted}</span>
+                        <span class="current-price">${currentPriceFormatted}</span>
+                        <span class="discount-badge">-${game.discount_percent}%</span>
+                    </div>` :
+                    `<div class="price-section">
+                        <span class="current-price">${currentPriceFormatted}</span>
+                    </div>`;
+
+                gamesHtml += `
+                    <div class="game-card">
+                        <img src="${game.image_url}" class="game-image" alt="${game.name}" 
+                             onerror="this.src='https://via.placeholder.com/400x200/0f0f0f/8e8e93?text=No+Image'">
+                        <div class="game-content">
+                            <h5 class="game-title">${game.name}</h5>
+                            ${priceDisplay}
+                            <div class="actions-row">
+                                <a href="${game.store_url}" target="_blank" class="btn-steam">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.187.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.029 4.524 4.524s-2.03 4.524-4.524 4.524h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.876 0-3.396-1.521-3.396-3.396 0-1.876 1.52-3.396 3.396-3.396.423 0 .83.079 1.205.222l1.81-.768-1.6-.665C3.305 8.259 6.998 4.36 11.979 4.36c4.99 0 9.038 4.047 9.038 9.037S16.969 22.434 11.98 22.434c-4.99 0-9.038-4.047-9.038-9.037 0-.29.015-.576.042-.858l2.512 1.04c-.011.238-.019.477-.019.718 0 3.034 2.465 5.5 5.5 5.5 3.034 0 5.5-2.466 5.5-5.5s-2.466-5.5-5.5-5.5c-.572 0-1.117.108-1.624.3l-2.046-.85C6.293 6.719 8.984 5.135 12 5.135c3.313 0 6 2.686 6 6s-2.687 6-6 6c-3.314 0-6-2.686-6-6 0-.642.126-1.255.354-1.816l-2.118-.877C3.573 9.427 3 10.75 3 12.198c0 4.142 3.357 7.5 7.5 7.5s7.5-3.358 7.5-7.5S16.142 4.698 12 4.698z"/>
+                                    </svg>
+                                    Steam
+                                </a>
+                                <button class="btn-wishlist" 
+                                        onclick="openWishlistModal(${JSON.stringify(game).replace(/"/g, '&quot;')})">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                    В вишлист
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            results.innerHTML = gamesHtml;
+        }
+
+        function openWishlistModal(game) {
+            if (!currentUser) {
+                alert('Пожалуйста, войдите в систему чтобы добавлять игры в список желаний');
+                showLoginModal();
+                return;
+            }
+            
+            currentGame = game;
+            const currentPriceFormatted = formatPrice(game.current_price);
+            
+            document.getElementById('modalGameName').textContent = game.name;
+            document.getElementById('modalGamePrice').textContent = `Текущая цена: ${currentPriceFormatted}`;
+            document.getElementById('targetPrice').value = '';
+            document.getElementById('targetDiscount').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('wishlistModal'));
+            modal.show();
+        }
+
+        async function addToWishlist() {
+            if (!currentGame) return;
+            
+            if (!currentUser) {
+                alert('Пожалуйста, войдите в систему чтобы добавлять игры в список желаний');
+                return;
+            }
+
+            const targetPrice = document.getElementById('targetPrice').value;
+            const targetDiscount = document.getElementById('targetDiscount').value;
+
+            try {
+                console.log('Добавление игры:', currentGame.name);
+                
+                const wishlistData = {
+                    steam_app_id: currentGame.steam_app_id,
+                    name: currentGame.name,
+                    current_price: currentGame.current_price,
+                    original_price: currentGame.original_price,
+                    discount_percent: currentGame.discount_percent,
+                    image_url: currentGame.image_url,
+                    store_url: currentGame.store_url,
+                    target_price: targetPrice ? parseFloat(targetPrice) : null,
+                    target_discount: targetDiscount ? parseInt(targetDiscount) : null
+                };
+
+                console.log('Отправка данных:', wishlistData);
+
+                const response = await fetch('/api/add-wishlist-direct/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(wishlistData)
+                });
+
+                console.log('Статус ответа:', response.status);
+                
+                const result = await response.json();
+                console.log('Ответ сервера:', result);
+
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('wishlistModal'));
+                    modal.hide();
+                    alert('Игра успешно добавлена в список желаний!');
+                } else {
+                    throw new Error(result.error || result.detail || 'Неизвестная ошибка');
+                }
+
+            } catch (error) {
+                console.error('Ошибка добавления:', error);
+                alert('Ошибка: ' + error.message);
+            }
+        }
+
+        function getCsrfToken() {
+            const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+            return csrfInput ? csrfInput.value : '';
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function showError(message) {
+            const errorAlert = document.getElementById('errorAlert');
+            errorAlert.textContent = message;
+            errorAlert.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('errorAlert').classList.add('hidden');
+        }
+
+        // Функции для работы с Telegram
+        function showTelegramModal() {
+            const modal = new bootstrap.Modal(document.getElementById('telegramModal'));
+            modal.show();
+            checkTelegramStatus();
+        }
+
+        async function checkTelegramStatus() {
+            try {
+                const response = await fetch('/api/telegram/status/');
+                const data = await response.json();
+        
+                if (data.connected) {
+                    document.getElementById('telegramConnect').style.display = 'none';
+                    document.getElementById('telegramConnected').style.display = 'block';
+            
+                    let userInfo = `@${data.telegram_username}`;
+                    if (data.telegram_first_name) {
+                        userInfo = `${data.telegram_first_name} (${userInfo})`;
+                    }
+                    document.getElementById('telegramUserInfo').textContent = userInfo;
+                } else {
+                    document.getElementById('telegramConnect').style.display = 'block';
+                    document.getElementById('telegramConnected').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking Telegram status:', error);
+            }
+        }
+
+        async function disconnectTelegram() {
+            if (!confirm('Отвязать Telegram аккаунт?')) return;
+
+            try {
+                const response = await fetch('/api/telegram/disconnect/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
+        
+                const data = await response.json();
+        
+                if (data.success) {
+                    alert('Telegram отвязан');
+                    checkTelegramStatus();
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        }
+        window.onTelegramAuth = function(user) {
+            // Эта функция вызывается автоматически после успешной авторизации
+            setTimeout(() => {
+                checkTelegramStatus();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('telegramModal'));
+                modal.hide();
+                alert('✅ Telegram успешно привязан! Проверьте сообщения в Telegram.');
+            }, 1000);
+        };
+
+        // Поиск при нажатии Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchGames();
+            }
+        });
+    </script>
+</body>
+</html>
