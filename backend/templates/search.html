@@ -1080,15 +1080,41 @@
                 alert('Ошибка: ' + error.message);
             }
         }
-        window.onTelegramAuth = function(user) {
-            // Эта функция вызывается автоматически после успешной авторизации
-            setTimeout(() => {
-                checkTelegramStatus();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('telegramModal'));
-                modal.hide();
-                alert('✅ Telegram успешно привязан! Проверьте сообщения в Telegram.');
-            }, 1000);
-        };
+
+        // Функция вызывается после успешной авторизации Telegram
+        function onTelegramAuth(user) {
+            console.log('Telegram auth successful:', user);
+            
+            // Отправляем данные на сервер
+            fetch('/api/telegram/connect/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify(user)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Показываем уведомление
+                    alert('✅ Telegram успешно привязан! Проверьте сообщения в Telegram.');
+                    
+                    // Обновляем статус
+                    checkTelegramStatus();
+                    
+                    // Закрываем модальное окно
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('telegramModal'));
+                    if (modal) modal.hide();
+                } else {
+                    alert('❌ Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ Ошибка подключения');
+            });
+        }
 
         // Поиск при нажатии Enter
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
