@@ -70,12 +70,23 @@ TEMPLATES = [
 ]
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600,
-        engine='django.db.backends.postgresql'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
+# Если на Render (есть DATABASE_URL), используем PostgreSQL
+if os.environ.get('DATABASE_URL'):
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DATABASE_NAME', 'steam_wishlist'),
+        'USER': os.environ.get('DATABASE_USER', 'steam_user'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', ''),
+        'HOST': os.environ.get('DATABASE_HOST', ''),
+        'PORT': os.environ.get('DATABASE_PORT', '5432'),
+    }
+
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
