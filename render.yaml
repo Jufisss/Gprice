@@ -5,18 +5,18 @@ services:
     plan: free
     buildCommand: |
       pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-      python manage.py migrate
-    startCommand: gunicorn core.wsgi:application
+      python backend/manage.py collectstatic --noinput
+      python backend/manage.py migrate
+    startCommand: gunicorn backend.core.wsgi:application
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: steam-wishlist-db
-          property: connectionString
       - key: SECRET_KEY
         generateValue: true
-      - key: WEB_CONCURRENCY
-        value: 4
+      - key: DEBUG
+        value: "False"
+      - key: TELEGRAM_BOT_TOKEN
+        value: "your_bot_token_here"
+      - key: TELEGRAM_BOT_USERNAME  
+        value: "SteamWishlistNotifierBot"
 
 databases:
   - name: steam-wishlist-db
