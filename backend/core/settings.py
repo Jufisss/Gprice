@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-testing')
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['*']  # Или ваш домен render.com
+ALLOWED_HOSTS = ['https://gprice.onrender.com']  # Или ваш домен render.com
 
 
 ALLOWED_HOSTS = ['*']
