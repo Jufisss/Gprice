@@ -671,6 +671,72 @@
         let currentGame = null;
         let currentUser = null;
 
+    <script>
+    // Функция вызывается после успешной авторизации Telegram
+    function onTelegramAuth(user) {
+        console.log('Telegram auth successful:', user);
+    
+        // Отправляем данные на сервер
+        fetch('/api/telegram/connect/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify(user)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Показываем уведомление
+                alert('✅ Telegram успешно привязан! Проверьте сообщения в Telegram.');
+            
+                // Обновляем статус
+                checkTelegramStatus();
+            
+            // Закрываем модальное окно
+                const modal = bootstrap.Modal.getInstance(document.getElementById('telegramModal'));
+                if (modal) modal.hide();
+            } else {
+                alert('❌ Ошибка: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Ошибка подключения');
+        });
+    }
+
+    // Функция для получения CSRF токена
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    // Проверка статуса привязки
+    async function checkTelegramStatus() {
+        try {
+            const response = await fetch('/api/telegram/status/');
+            const data = await response.json();
+        
+            if (data.connected) {
+                document.getElementById('telegramConnect').style.display = 'none';
+                document.getElementById('telegramConnected').style.display = 'block';
+            
+                let userInfo = `@${data.telegram_username}`;
+                if (data.telegram_first_name) {
+                    userInfo = `${data.telegram_first_name} (${userInfo})`;
+                }
+                document.getElementById('telegramUserInfo').textContent = userInfo;
+            } else {
+                document.getElementById('telegramConnect').style.display = 'block';
+                document.getElementById('telegramConnected').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error checking Telegram status:', error);
+        }
+    }
+    </script>
+
         // Функция форматирования цены
         function formatPrice(price) {
             if (price === 0 || price === null) return 'Бесплатно';
@@ -814,6 +880,8 @@
             }
         }
 
+        
+
         async function userLogout() {
             try {
                 await fetch('/api/auth/logout/', {
@@ -831,6 +899,7 @@
             }
         }
 
+        
         // Функции поиска и отображения игр
         async function searchGames() {
             const query = document.getElementById('searchInput').value.trim();
