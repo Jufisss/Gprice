@@ -399,11 +399,11 @@
                 padding-left: 20px;
                 padding-right: 20px;
             }
-
+            
             .header-buttons {
                 right: 20px;
             }
-
+            
             .logo {
                 margin-left: 20px;
             }
@@ -413,28 +413,28 @@
             .games-grid {
                 grid-template-columns: 1fr;
             }
-
+            
             .header {
                 height: 120px;
                 flex-direction: column;
                 justify-content: center;
             }
-
+            
             .logo {
                 margin-left: 0;
                 margin-bottom: 10px;
             }
-
+            
             .header-buttons {
                 position: static;
                 margin-top: 10px;
             }
-
+            
             .search-section {
                 height: 100px;
                 padding: 0 20px;
             }
-
+            
             .search-form {
                 height: 60px;
             }
@@ -443,22 +443,22 @@
 </head>
 <body>
     {% csrf_token %}
-
+    
     <!-- Хэдер -->
     <header class="header">
         <div class="logo">
             <img src="https://i.postimg.cc/nLwzR4x9/logo.png" alt="Gprice Tracker" class="logo-img">
         </div>
-
+        
         <div class="header-buttons">
             <nav class="navbar-nav ms-auto d-flex flex-row">
                 <a class="nav-link active" href="/">Поиск</a>
                 <a class="nav-link" href="/wishlist/">Мой список</a>
                 <a class="nav-link" href="/admin/" target="_blank">Админка</a>
             </nav>
-
+            
             <span class="user-greeting" id="userGreeting"></span>
-
+            
             <div id="guestMenu">
                 <button class="header-btn" title="Вход" onclick="showLoginModal()">
                     <svg viewBox="0 0 24 24">
@@ -472,7 +472,7 @@
                     </svg>
                 </button>
             </div>
-
+            
             <div id="userMenu" class="user-menu">
                 <button class="header-btn" title="Профиль">
                     <svg viewBox="0 0 24 24">
@@ -637,20 +637,19 @@
                 <div class="modal-body">
                     <div id="telegramConnect" style="display: none;">
                         <p><strong>Привяжите Telegram для уведомлений о скидках</strong></p>
-
+                    
                         <!-- Telegram Login Widget -->
                         <script async src="https://telegram.org/js/telegram-widget.js?22" 
                                 data-telegram-login="Gprice_Tracker_bot" 
                                 data-size="large" 
-                                data-auth-url="https://gprice.onrender.com/api/telegram/connect/" 
-                                data-request-access="write"
-                                data-onauth="onTelegramAuth(user)"></script>
-
+                                data-auth-url="/api/telegram/connect/" 
+                                data-request-access="write"></script>
+                    
                         <p class="mt-3 text-muted small">
                             После авторизации бот отправит вам подтверждение в Telegram
                         </p>
                     </div>
-
+                
                     <div id="telegramConnected" style="display: none;">
                         <div class="alert alert-success">
                             <strong>✅ Telegram привязан!</strong>
@@ -705,7 +704,7 @@
             document.getElementById('guestInfo').style.display = 'none';
             document.getElementById('userInfo').style.display = 'block';
             document.getElementById('userGreeting').textContent = `Привет, ${userData.username}!`;
-
+            
             // Обновляем классы для отображения
             document.getElementById('guestInfo').classList.add('hidden');
             document.getElementById('userInfo').classList.remove('hidden');
@@ -719,7 +718,7 @@
             document.getElementById('userMenu').style.display = 'none';
             document.getElementById('guestInfo').style.display = 'block';
             document.getElementById('userInfo').style.display = 'none';
-
+            
             // Обновляем классы для отображения
             document.getElementById('guestInfo').classList.remove('hidden');
             document.getElementById('userInfo').classList.add('hidden');
@@ -741,7 +740,7 @@
         async function userRegister() {
             const form = document.getElementById('registerForm');
             const formData = new FormData(form);
-
+            
             const data = {
                 username: formData.get('username'),
                 email: formData.get('email'),
@@ -761,13 +760,13 @@
                 });
 
                 const result = await response.json();
-
+                
                 if (response.ok) {
                     setUserAuthenticated(result.user);
-
+                    
                     const modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                     modal.hide();
-
+                    
                     alert('Регистрация успешна!');
                 } else {
                     alert('Ошибка регистрации: ' + (result.detail || JSON.stringify(result)));
@@ -780,7 +779,7 @@
         async function userLogin() {
             const form = document.getElementById('loginForm');
             const formData = new FormData(form);
-
+            
             const data = {
                 username: formData.get('username'),
                 password: formData.get('password')
@@ -798,13 +797,13 @@
                 });
 
                 const result = await response.json();
-
+                
                 if (response.ok) {
                     setUserAuthenticated(result.user);
-
+                    
                     const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                     modal.hide();
-
+                    
                     alert('Вход успешен!');
                 } else {
                     alert('Ошибка входа: ' + (result.error || JSON.stringify(result)));
@@ -823,7 +822,7 @@
                     },
                     credentials: 'same-origin'
                 });
-
+                
                 setUserUnauthenticated();
                 alert('Выход успешен!');
             } catch (error) {
@@ -834,7 +833,7 @@
         // Функции поиска и отображения игр
         async function searchGames() {
             const query = document.getElementById('searchInput').value.trim();
-
+            
             if (query.length < 2) {
                 showError('Введите минимум 2 символа для поиска');
                 return;
@@ -845,17 +844,17 @@
 
             try {
                 const response = await fetch(`http://localhost:8001/search/steam?q=${encodeURIComponent(query)}`);
-
+                
                 if (!response.ok) {
                     throw new Error(`Ошибка сервера: ${response.status}`);
                 }
-
+                
                 const data = await response.json();
-
+                
                 if (data.error) {
                     throw new Error(data.error);
                 }
-
+                
                 hideLoading();
                 displayGames(data);
 
@@ -868,7 +867,7 @@
 
         function displayGames(games) {
             const results = document.getElementById('results');
-
+            
             if (!Array.isArray(games) || games.length === 0) {
                 results.innerHTML = `
                     <div class="col-12">
@@ -886,7 +885,7 @@
                 const hasDiscount = game.discount_percent > 0;
                 const currentPriceFormatted = formatPrice(game.current_price);
                 const originalPriceFormatted = formatPrice(game.original_price);
-
+                
                 const priceDisplay = hasDiscount ? 
                     `<div class="price-section">
                         <span class="original-price">${originalPriceFormatted}</span>
@@ -923,7 +922,7 @@
                     </div>
                 `;
             });
-
+            
             results.innerHTML = gamesHtml;
         }
 
@@ -933,22 +932,22 @@
                 showLoginModal();
                 return;
             }
-
+            
             currentGame = game;
             const currentPriceFormatted = formatPrice(game.current_price);
-
+            
             document.getElementById('modalGameName').textContent = game.name;
             document.getElementById('modalGamePrice').textContent = `Текущая цена: ${currentPriceFormatted}`;
             document.getElementById('targetPrice').value = '';
             document.getElementById('targetDiscount').value = '';
-
+            
             const modal = new bootstrap.Modal(document.getElementById('wishlistModal'));
             modal.show();
         }
 
         async function addToWishlist() {
             if (!currentGame) return;
-
+            
             if (!currentUser) {
                 alert('Пожалуйста, войдите в систему чтобы добавлять игры в список желаний');
                 return;
@@ -959,7 +958,7 @@
 
             try {
                 console.log('Добавление игры:', currentGame.name);
-
+                
                 const wishlistData = {
                     steam_app_id: currentGame.steam_app_id,
                     name: currentGame.name,
@@ -985,7 +984,7 @@
                 });
 
                 console.log('Статус ответа:', response.status);
-
+                
                 const result = await response.json();
                 console.log('Ответ сервера:', result);
 
@@ -1038,11 +1037,11 @@
             try {
                 const response = await fetch('/api/telegram/status/');
                 const data = await response.json();
-
+        
                 if (data.connected) {
                     document.getElementById('telegramConnect').style.display = 'none';
                     document.getElementById('telegramConnected').style.display = 'block';
-
+            
                     let userInfo = `@${data.telegram_username}`;
                     if (data.telegram_first_name) {
                         userInfo = `${data.telegram_first_name} (${userInfo})`;
@@ -1067,9 +1066,9 @@
                         'X-CSRFToken': getCsrfToken()
                     }
                 });
-
+        
                 const data = await response.json();
-
+        
                 if (data.success) {
                     alert('Telegram отвязан');
                     checkTelegramStatus();
@@ -1080,41 +1079,15 @@
                 alert('Ошибка: ' + error.message);
             }
         }
-
-        // Функция вызывается после успешной авторизации Telegram
-        function onTelegramAuth(user) {
-            console.log('Telegram auth successful:', user);
-            
-            // Отправляем данные на сервер
-            fetch('/api/telegram/connect/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken()
-                },
-                body: JSON.stringify(user)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Показываем уведомление
-                    alert('✅ Telegram успешно привязан! Проверьте сообщения в Telegram.');
-                    
-                    // Обновляем статус
-                    checkTelegramStatus();
-                    
-                    // Закрываем модальное окно
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('telegramModal'));
-                    if (modal) modal.hide();
-                } else {
-                    alert('❌ Ошибка: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('❌ Ошибка подключения');
-            });
-        }
+        window.onTelegramAuth = function(user) {
+            // Эта функция вызывается автоматически после успешной авторизации
+            setTimeout(() => {
+                checkTelegramStatus();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('telegramModal'));
+                modal.hide();
+                alert('✅ Telegram успешно привязан! Проверьте сообщения в Telegram.');
+            }, 1000);
+        };
 
         // Поиск при нажатии Enter
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
